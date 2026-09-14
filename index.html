@@ -40,7 +40,7 @@
 </head>
 <body class="crt bg-void text-zinc-300 font-mono min-h-screen p-3 md:p-8 flex items-center justify-center selection:bg-emerald-500 selection:text-black">
 
-    <!-- Terminal Window Container (Fixed Height Shell) -->
+    <!-- Terminal Window Container -->
     <div class="w-full max-w-4xl bg-zinc-950/90 border border-zinc-800/80 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden flex flex-col h-[85vh]">
         
         <!-- Window Topbar -->
@@ -59,7 +59,7 @@
         <!-- Terminal Body -->
         <div class="p-4 md:p-6 flex-1 flex flex-col min-h-0 overflow-hidden space-y-3">
             
-            <!-- Output Buffer (Scrolls internally while keeping controls docked) -->
+            <!-- Output Buffer -->
             <div id="terminal-output" class="flex-1 overflow-y-auto space-y-4 text-xs md:text-sm pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
                 <!-- Banner loaded dynamically -->
             </div>
@@ -70,14 +70,15 @@
                 <button onclick="execCmd('exp')" class="px-2.5 py-1 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 rounded text-[11px] text-zinc-300 transition hover:text-termAccent">exp</button>
                 <button onclick="execCmd('projects')" class="px-2.5 py-1 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 rounded text-[11px] text-zinc-300 transition hover:text-termAccent">projects</button>
                 <button onclick="execCmd('skills')" class="px-2.5 py-1 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 rounded text-[11px] text-zinc-300 transition hover:text-termAccent">skills</button>
+                <a href="https://drive.google.com/file/d/1b4e1J2_-JOGOaHFDu06PJ3mwDCWDzcx2/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/40 rounded text-[11px] text-termAccent transition font-semibold flex items-center gap-1">📄 resume ↗</a>
                 <button onclick="execCmd('contact')" class="px-2.5 py-1 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 rounded text-[11px] text-zinc-300 transition hover:text-termAccent">contact</button>
                 <button onclick="execCmd('clear')" class="px-2.5 py-1 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 rounded text-[11px] text-red-400 hover:border-red-500/50 transition">clear</button>
             </div>
 
-            <!-- Command Input Prompt (Anchored at bottom) -->
+            <!-- Command Input Prompt -->
             <div class="shrink-0 flex items-center space-x-2 bg-zinc-900/40 px-3 py-2 rounded-lg border border-zinc-800/80 focus-within:border-zinc-700">
                 <span class="text-termAccent font-bold text-xs select-none">⚡ suraj@dev:~$</span>
-                <input type="text" id="cmd-input" autofocus autocomplete="off" spellcheck="false" class="bg-transparent border-none outline-none flex-1 text-zinc-100 text-xs md:text-sm font-mono caret-termAccent" placeholder="type command (e.g. 'help', 'exp')...">
+                <input type="text" id="cmd-input" autofocus autocomplete="off" spellcheck="false" class="bg-transparent border-none outline-none flex-1 text-zinc-100 text-xs md:text-sm font-mono caret-termAccent" placeholder="type command (e.g. 'help', 'resume')...">
             </div>
         </div>
     </div>
@@ -93,7 +94,6 @@
         let history = [];
         let historyIdx = -1;
 
-        // Pixel-perfect 60-character symmetric SURAJ IYER ASCII banner
         const initialBannerHTML = String.raw`
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pb-4 border-b border-zinc-900">
                 <pre class="md:col-span-6 text-termAccent font-bold leading-none text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] select-none overflow-x-auto">
@@ -116,7 +116,6 @@
             </div>
         `;
 
-        // Render Initial Banner on Page Load
         output.innerHTML = initialBannerHTML;
 
         const commands = {
@@ -125,6 +124,7 @@
                     <p class="text-zinc-200 font-bold">AVAILABLE COMMANDS:</p>
                     <p><span class="text-termAccent font-semibold">summary</span>    - System overview & personal stats</p>
                     <p><span class="text-termAccent font-semibold">about</span>      - Personal background & profile</p>
+                    <p><span class="text-termAccent font-semibold">resume</span>     - Open official PDF resume</p>
                     <p><span class="text-termAccent font-semibold">exp</span>        - Work experience & internships</p>
                     <p><span class="text-termAccent font-semibold">projects</span>   - Key infrastructure & backend projects</p>
                     <p><span class="text-termAccent font-semibold">skills</span>     - Programming languages, cloud tools & ratings</p>
@@ -138,6 +138,11 @@
                     <p>⚡ <span class="text-zinc-100 font-bold">Suraj Iyer</span> | Software Engineer @ Branch International</p>
                     <p class="text-zinc-400">Specializing in high-concurrency backend systems, Go microservices, Kubernetes, and IaC automation.</p>
                     <p class="text-zinc-400">Completed B.Tech in Computer Engineering at Sardar Patel Institute of Technology with Minors in Finance & Management from SPJIMR.</p>
+                </div>
+            `,
+            resume: `
+                <div class="space-y-1 text-zinc-300">
+                    <p>📄 Opening official resume in a new tab... If popups are blocked, click <a href="https://drive.google.com/file/d/1b4e1J2_-JOGOaHFDu06PJ3mwDCWDzcx2/view?usp=sharing" target="_blank" class="text-termSecondary underline font-bold">here ↗</a>.</p>
                 </div>
             `,
             exp: `
@@ -209,7 +214,10 @@
             const res = document.createElement('div');
             res.className = "text-xs md:text-sm pl-2";
 
-            if (cmd === 'summary' || cmd === 'neofetch') {
+            if (cmd === 'resume') {
+                window.open('https://drive.google.com/file/d/1b4e1J2_-JOGOaHFDu06PJ3mwDCWDzcx2/view?usp=sharing', '_blank');
+                res.innerHTML = commands.resume;
+            } else if (cmd === 'summary' || cmd === 'neofetch') {
                 res.innerHTML = commands.about + commands.skills;
             } else if (commands[cmd]) {
                 res.innerHTML = commands[cmd];
